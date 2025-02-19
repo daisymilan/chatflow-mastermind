@@ -1,4 +1,3 @@
-
 export type CommandType = '/create-post' | '/templates' | '/platforms' | '/status' | '/help';
 
 export interface ChatMessage {
@@ -14,6 +13,6 @@ export interface PostRequest {
   postDetails: string;
   targetPlatforms: string[];
   companyTone: string;
-  canvaTemplateId: string;
+  canvaTemplateLink: string;
   notificationEmail?: string;
 }
