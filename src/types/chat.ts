@@ -13,6 +13,7 @@ export interface PostRequest {
   postDetails: string;
   targetPlatforms: string[];
   companyTone: string;
-  canvaTemplateLink: string;
+  templateKey: string;
   notificationEmail?: string;
 }
+

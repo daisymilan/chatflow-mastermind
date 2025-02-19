@@ -23,10 +23,11 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 ];
 
 const TEMPLATES = [
-  { id: "https://www.canva.com/design/DAGfDeZzMpA/MQ5X3mBx_RjTX1HbyVYmJA/view?utm_content=DAGfDeZzMpA&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Navigating Template" },
-  { id: "https://www.canva.com/design/DAGe_IUdrY0/SMjJ7yuBBcyyii9q2QwC9A/view?utm_content=DAGe_IUdrY0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Connect template" },
-  { id: "https://www.canva.com/design/DAGfh0eGtZQ/j0bxHFUyXOtPdmJiSGijoA/view?utm_content=DAGfh0eGtZQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Birthday Template" }
+  { id: "template1", name: "Navigating Template" },
+  { id: "template2", name: "Connect template" },
+  { id: "template3", name: "Birthday Template" }
 ];
+
 
 const PLATFORMS = ["Instagram", "Facebook", "TikTok"];
 
@@ -35,9 +36,10 @@ interface PostCreationState {
   postType?: string;
   postDetails?: string;
   targetPlatforms?: string[];
-  canvaTemplateLink?: string;
+  templateKey?: string;
   companyTone?: string;
 }
+
 
 const COMMANDS: Record<CommandType, string> = {
   "/create-post": "Let's create a new social media post. What type of post would you like to create?\n\n1. Product showcase\n2. Promotional offer\n3. Company update",
@@ -153,7 +155,7 @@ const Index = () => {
         addBotMessage(`Select a template:\n${TEMPLATES.map((t, i) => `${i + 1}. ${t.name}`).join("\n")}`);
         break;
 
-      case 4: // Template
+        case 4: // Template
         const templateIndex = parseInt(message) - 1;
         if (isNaN(templateIndex) || templateIndex < 0 || templateIndex >= TEMPLATES.length) {
           addBotMessage("Please select a valid template number");
@@ -162,20 +164,20 @@ const Index = () => {
         setPostCreation({
           ...postCreation,
           step: 5,
-          canvaTemplateLink: TEMPLATES[templateIndex].id,
+          templateKey: TEMPLATES[templateIndex].id,
         });
         addBotMessage("Finally, describe your company's tone (formal, casual, playful):");
         break;
-
+      
       case 5: // Company tone
         const postRequest: PostRequest = {
           postType: postCreation.postType!,
           postDetails: postCreation.postDetails!,
           targetPlatforms: postCreation.targetPlatforms!,
-          canvaTemplateLink: postCreation.canvaTemplateLink!,
+          templateKey: postCreation.templateKey!,
           companyTone: message,
         };
-
+      
         setIsProcessing(true);
         try {
           const response = await fetch(N8N_WEBHOOK_URL, {
@@ -186,6 +188,7 @@ const Index = () => {
             },
             body: JSON.stringify(postRequest),
           });
+      
 
           if (!response.ok) {
             const errorText = await response.text();
@@ -211,35 +214,36 @@ const Index = () => {
     }
   };
 
-    const handleSendMessage = async (content: string) => {
-        const userMessage: ChatMessage = {
-            id: Date.now().toString(),
-            content,
-            type: "user",
-            timestamp: new Date(),
-            command: content.startsWith("/") ? content as CommandType : undefined,
-        };
-
-        setMessages((prev) => [...prev, userMessage]);
-
-        if (content.startsWith("/")) {
-            const command = content as CommandType;
-            if (command === "/create-post") {
-                setPostCreation({ step: 1, canvaTemplateLink: "" }); // Initialize canvaTemplateLink
-            }
-            if (COMMANDS[command]) {
-                addBotMessage(COMMANDS[command]);
-            } else {
-                toast({
-                    title: "Unknown Command",
-                    description: "Type /help to see available commands",
-                    variant: "destructive",
-                });
-            }
-        } else if (postCreation) {
-            await handlePostCreationStep(content);
-        }
+  const handleSendMessage = async (content: string) => {
+    const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        content,
+        type: "user",
+        timestamp: new Date(),
+        command: content.startsWith("/") ? content as CommandType : undefined,
     };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    if (content.startsWith("/")) {
+        const command = content as CommandType;
+        if (command === "/create-post") {
+            setPostCreation({ step: 1, templateKey: "" }); // Initialize templateKey
+        }
+        if (COMMANDS[command]) {
+            addBotMessage(COMMANDS[command]);
+        } else {
+            toast({
+                title: "Unknown Command",
+                description: "Type /help to see available commands",
+                variant: "destructive",
+            });
+        }
+    } else if (postCreation) {
+        await handlePostCreationStep(content);
+    }
+};
+
 
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto">
