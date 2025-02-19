@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChatMessage as ChatMessageComponent } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
@@ -6,7 +5,7 @@ import { ChatMessage, CommandType, PostRequest } from "@/types/chat";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const N8N_WEBHOOK_URL = "https://n8n.servenorobot.com/webhook/social-media-post";
+const PROXY_URL = "http://localhost:3000/proxy";
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
@@ -135,17 +134,25 @@ const Index = () => {
 
         setIsProcessing(true);
         try {
-          const response = await fetch(N8N_WEBHOOK_URL, {
+          const response = await fetch(PROXY_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
             body: JSON.stringify(postRequest),
           });
 
-          if (!response.ok) throw new Error("Failed to create post");
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
+          const data = await response.json();
           addBotMessage("Your post has been submitted for creation! Use /status to check its progress.");
+          console.log('Response from proxy server:', data);
           setPostCreation(null);
         } catch (error) {
+          console.error('Error sending request:', error);
           toast({
             title: "Error",
             description: "Failed to create post. Please try again.",
@@ -159,7 +166,6 @@ const Index = () => {
   };
 
   const handleSendMessage = async (content: string) => {
-    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
@@ -170,7 +176,6 @@ const Index = () => {
 
     setMessages((prev) => [...prev, userMessage]);
 
-    // Handle commands
     if (content.startsWith("/")) {
       const command = content as CommandType;
       if (command === "/create-post") {
