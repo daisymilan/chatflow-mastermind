@@ -5,7 +5,7 @@ import { ChatMessage, CommandType, PostRequest } from "@/types/chat";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const PROXY_URL = "/api/proxy";
+const N8N_WEBHOOK_URL = "https://n8n.servenorobot.com/webhook/social-media-post";
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
@@ -86,9 +86,9 @@ const Index = () => {
         setIsProcessing(true);
         try {
           const requestBody = JSON.stringify({ prompt: `Give me details for a ${postType} social media post.` });
-          console.log("Sending request to proxy with body:", requestBody);
+          console.log("Sending request to n8n with body:", requestBody);
 
-          const response = await fetch(PROXY_URL, {
+          const response = await fetch(N8N_WEBHOOK_URL, {
             method: "POST",
             headers: { 
               "Content-Type": "application/json",
@@ -97,16 +97,16 @@ const Index = () => {
             body: requestBody,
           });
 
-          console.log("Proxy response status:", response.status);
+          console.log("n8n response status:", response.status);
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.error("Proxy response body:", errorText);
+            console.error("n8n response body:", errorText);
             throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
           }
 
           const data = await response.json();
-          console.log("Proxy response data:", data);
+          console.log("n8n response data:", data);
           if (data && data.details) {
             addBotMessage(data.details); // Assuming the response has a "details" field
           } else {
@@ -174,7 +174,7 @@ const Index = () => {
 
         setIsProcessing(true);
         try {
-          const response = await fetch(PROXY_URL, {
+          const response = await fetch(N8N_WEBHOOK_URL, {
             method: "POST",
             headers: { 
               "Content-Type": "application/json",
@@ -185,13 +185,13 @@ const Index = () => {
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.error("Proxy response body:", errorText);
+            console.error("n8n response body:", errorText);
             throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
           }
 
           const data = await response.json();
           addBotMessage("Your post has been submitted for creation! Use /status to check its progress.");
-          console.log('Response from proxy server:', data);
+          console.log('Response from n8n:', data);
           setPostCreation(null);
         } catch (error: any) {
           console.error('Error sending request:', error);
