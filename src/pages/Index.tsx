@@ -35,7 +35,7 @@ interface PostCreationState {
   postType?: string;
   postDetails?: string;
   targetPlatforms?: string[];
-  canvaTemplateId?: string;
+  canvaTemplateLink?: string;
   companyTone?: string;
 }
 
@@ -82,7 +82,35 @@ const Index = () => {
           step: 2,
           postType,
         });
-        addBotMessage("Great! Now, please provide the details for your post.");
+
+        setIsProcessing(true);
+        try {
+          const response = await fetch(PROXY_URL, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ prompt: `Give me details for a ${postType} social media post.` }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          addBotMessage(data.details); // Assuming the response has a "details" field
+          addBotMessage("Great! Now, please provide the details for your post.");
+        } catch (error) {
+          console.error('Error sending request:', error);
+          toast({
+            title: "Error",
+            description: "Failed to get post details. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsProcessing(false);
+        }
         break;
 
       case 2: // Post details
@@ -118,7 +146,7 @@ const Index = () => {
         setPostCreation({
           ...postCreation,
           step: 5,
-          canvaTemplateId: TEMPLATES[templateIndex].id,
+          canvaTemplateLink: TEMPLATES[templateIndex].id,
         });
         addBotMessage("Finally, describe your company's tone (formal, casual, playful):");
         break;
@@ -128,7 +156,7 @@ const Index = () => {
           postType: postCreation.postType!,
           postDetails: postCreation.postDetails!,
           targetPlatforms: postCreation.targetPlatforms!,
-          canvaTemplateId: postCreation.canvaTemplateId!,
+          canvaTemplateLink: postCreation.canvaTemplateLink!,
           companyTone: message,
         };
 
@@ -165,35 +193,35 @@ const Index = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content,
-      type: "user",
-      timestamp: new Date(),
-      command: content.startsWith("/") ? content as CommandType : undefined,
+    const handleSendMessage = async (content: string) => {
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            content,
+            type: "user",
+            timestamp: new Date(),
+            command: content.startsWith("/") ? content as CommandType : undefined,
+        };
+
+        setMessages((prev) => [...prev, userMessage]);
+
+        if (content.startsWith("/")) {
+            const command = content as CommandType;
+            if (command === "/create-post") {
+                setPostCreation({ step: 1 });
+            }
+            if (COMMANDS[command]) {
+                addBotMessage(COMMANDS[command]);
+            } else {
+                toast({
+                    title: "Unknown Command",
+                    description: "Type /help to see available commands",
+                    variant: "destructive",
+                });
+            }
+        } else if (postCreation) {
+            await handlePostCreationStep(content);
+        }
     };
-
-    setMessages((prev) => [...prev, userMessage]);
-
-    if (content.startsWith("/")) {
-      const command = content as CommandType;
-      if (command === "/create-post") {
-        setPostCreation({ step: 1 });
-      }
-      if (COMMANDS[command]) {
-        addBotMessage(COMMANDS[command]);
-      } else {
-        toast({
-          title: "Unknown Command",
-          description: "Type /help to see available commands",
-          variant: "destructive",
-        });
-      }
-    } else if (postCreation) {
-      await handlePostCreationStep(content);
-    }
-  };
 
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto">
