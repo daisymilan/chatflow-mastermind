@@ -23,9 +23,9 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 ];
 
 const TEMPLATES = [
-  { id: "template1", name: "Product Showcase - Square" },
-  { id: "template2", name: "Promotional Offer - Story" },
-  { id: "template3", name: "Company Update - Wide" },
+  { id: "https://www.canva.com/design/DAGfDeZzMpA/MQ5X3mBx_RjTX1HbyVYmJA/view?utm_content=DAGfDeZzMpA&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Navigating Template" },
+  { id: "https://www.canva.com/design/DAGe_IUdrY0/SMjJ7yuBBcyyii9q2QwC9A/view?utm_content=DAGe_IUdrY0&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Connect template" },
+  { id: "https://www.canva.com/design/DAGfh0eGtZQ/j0bxHFUyXOtPdmJiSGijoA/view?utm_content=DAGfh0eGtZQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview", name: "Birthday Template" }
 ];
 
 const PLATFORMS = ["Instagram", "Facebook", "TikTok"];
