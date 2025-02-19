@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
+    console.log('Method not allowed');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -37,9 +38,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // REPLACE WITH A STATIC RESPONSE
     console.log('Sending static response');
     res.status(200).json({ details: "This is a test response from the proxy!" });
+    return; // Ensure the function returns after sending the response
 
   } catch (error: any) {
     console.error('Detailed proxy server error:', error);
+    console.error('Error stack trace:', error.stack); // Log the stack trace
     res.status(500).json({ error: error.message });
+    return; // Ensure the function returns after sending the error response
   }
 }
