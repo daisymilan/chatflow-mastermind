@@ -5,7 +5,7 @@ import { ChatMessage, CommandType, PostRequest } from "@/types/chat";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const PROXY_URL = "http://localhost:3000/proxy";
+const PROXY_URL = "/api/proxy";
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {

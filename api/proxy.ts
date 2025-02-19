@@ -1,14 +1,11 @@
 
-import express from 'express';
-import cors from 'cors';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-app.use(cors());
-app.use(express.json());
-
-app.post('/proxy', async (req, res) => {
   try {
     const response = await fetch('https://n8n.servenorobot.com/webhook/social-media-post', {
       method: 'POST',
@@ -29,8 +26,4 @@ app.post('/proxy', async (req, res) => {
     console.error('Proxy server error:', error);
     res.status(500).json({ error: 'Failed to process request' });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Proxy server running on port ${PORT}`);
-});
+}
