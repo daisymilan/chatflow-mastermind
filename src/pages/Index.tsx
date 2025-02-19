@@ -85,27 +85,39 @@ const Index = () => {
 
         setIsProcessing(true);
         try {
+          const requestBody = JSON.stringify({ prompt: `Give me details for a ${postType} social media post.` });
+          console.log("Sending request to proxy with body:", requestBody);
+
           const response = await fetch(PROXY_URL, {
             method: "POST",
             headers: { 
               "Content-Type": "application/json",
               "Accept": "application/json"
             },
-            body: JSON.stringify({ prompt: `Give me details for a ${postType} social media post.` }),
+            body: requestBody,
           });
 
+          console.log("Proxy response status:", response.status);
+
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error("Proxy response body:", errorText);
+            throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
           }
 
           const data = await response.json();
-          addBotMessage(data.details); // Assuming the response has a "details" field
+          console.log("Proxy response data:", data);
+          if (data && data.details) {
+            addBotMessage(data.details); // Assuming the response has a "details" field
+          } else {
+            addBotMessage("Received an empty response from the server.");
+          }
           addBotMessage("Great! Now, please provide the details for your post.");
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error sending request:', error);
           toast({
             title: "Error",
-            description: "Failed to get post details. Please try again.",
+            description: `Failed to get post details. Please try again. ${error.message}`,
             variant: "destructive",
           });
         } finally {
@@ -172,18 +184,20 @@ const Index = () => {
           });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error("Proxy response body:", errorText);
+            throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
           }
 
           const data = await response.json();
           addBotMessage("Your post has been submitted for creation! Use /status to check its progress.");
           console.log('Response from proxy server:', data);
           setPostCreation(null);
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error sending request:', error);
           toast({
             title: "Error",
-            description: "Failed to create post. Please try again.",
+            description: `Failed to create post. Please try again. ${error.message}`,
             variant: "destructive",
           });
         } finally {
