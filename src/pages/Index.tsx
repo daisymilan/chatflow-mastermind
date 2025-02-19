@@ -81,11 +81,15 @@ const Index = () => {
           ...postCreation,
           step: 2,
           postType,
+          canvaTemplateLink: postCreation.canvaTemplateLink // Keep the canvaTemplateLink
         });
 
         setIsProcessing(true);
         try {
-          const requestBody = JSON.stringify({ prompt: `Give me details for a ${postType} social media post.` });
+          const requestBody = JSON.stringify({ 
+            prompt: `Give me details for a ${postType} social media post.`,
+            canvaTemplateLink: postCreation.canvaTemplateLink // Send the canvaTemplateLink
+          });
           console.log("Sending request to n8n with body:", requestBody);
 
           const response = await fetch(N8N_WEBHOOK_URL, {
@@ -221,7 +225,7 @@ const Index = () => {
         if (content.startsWith("/")) {
             const command = content as CommandType;
             if (command === "/create-post") {
-                setPostCreation({ step: 1 });
+                setPostCreation({ step: 1, canvaTemplateLink: "" }); // Initialize canvaTemplateLink
             }
             if (COMMANDS[command]) {
                 addBotMessage(COMMANDS[command]);
